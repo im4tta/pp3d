@@ -1,0 +1,93 @@
+.wrapper {
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--border);
+}
+
+.sectionLabel {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: 0.15em;
+  color: var(--text-dim);
+  margin-bottom: 10px;
+}
+
+.countLine {
+  margin-bottom: 10px;
+}
+
+.countNum {
+  font-family: var(--font-mono);
+  font-size: 20px;
+  font-weight: 500;
+  color: var(--accent);
+}
+
+.countLabel {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--text-dim);
+}
+
+.btnRow {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 9px 0;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  color: var(--text-mid);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s, color 0.15s;
+  letter-spacing: 0.04em;
+}
+
+.btn:hover:not(:disabled) {
+  background: rgba(240, 165, 0, 0.08);
+  border-color: rgba(240, 165, 0, 0.4);
+  color: var(--accent);
+}
+
+.btn:active:not(:disabled) {
+  transform: translateY(1px);
+}
+
+.btn:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+/* Flash state after download */
+.btnFlash {
+  background: rgba(240, 165, 0, 0.12) !important;
+  border-color: var(--accent) !important;
+  color: var(--accent) !important;
+}
+
+.icon {
+  font-size: 12px;
+  opacity: 0.7;
+}
+
+.checkmark {
+  font-size: 11px;
+  letter-spacing: 0.05em;
+}
+
+.hint {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  color: var(--text-dim);
+  line-height: 1.6;
+  opacity: 0.7;
+}

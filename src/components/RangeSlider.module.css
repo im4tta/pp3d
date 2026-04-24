@@ -1,0 +1,74 @@
+.wrapper {
+  user-select: none;
+}
+
+.labels {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 10px;
+  font-family: var(--font-mono);
+  font-size: 13px;
+  color: var(--text);
+}
+
+.val  { color: var(--accent); font-weight: 500; }
+.dash { color: var(--text-dim); font-size: 10px; }
+
+/* Track */
+.track {
+  position: relative;
+  height: 4px;
+  background: var(--surface2);
+  border-radius: 2px;
+  margin: 10px 8px;
+  cursor: pointer;
+}
+
+/* Filled range between handles */
+.fill {
+  position: absolute;
+  top: 0;
+  height: 100%;
+  background: var(--accent);
+  border-radius: 2px;
+  pointer-events: none;
+}
+
+/* Handles */
+.handle {
+  position: absolute;
+  top: 50%;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: var(--accent);
+  border: 2px solid var(--bg);
+  transform: translate(-50%, -50%);
+  cursor: grab;
+  transition: transform 0.1s, box-shadow 0.1s;
+  box-shadow: 0 0 0 0 rgba(240, 165, 0, 0.3);
+}
+
+.handle:hover,
+.handle:focus {
+  transform: translate(-50%, -50%) scale(1.25);
+  box-shadow: 0 0 0 4px rgba(240, 165, 0, 0.2);
+  outline: none;
+}
+
+.handle:active {
+  cursor: grabbing;
+  transform: translate(-50%, -50%) scale(1.1);
+}
+
+/* Bound labels */
+.bounds {
+  display: flex;
+  justify-content: space-between;
+  font-family: var(--font-mono);
+  font-size: 9px;
+  color: var(--text-dim);
+  margin-top: 4px;
+  padding: 0 2px;
+}

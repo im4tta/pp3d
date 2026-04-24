@@ -1,0 +1,45 @@
+@import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=Syne:wght@400;600;700;800&display=swap');
+
+:root {
+  --bg:        #0a0c10;
+  --surface:   #111318;
+  --surface2:  #1a1d24;
+  --border:    #2a2d36;
+  --accent:    #f0a500;
+  --accent2:   #e05c2a;
+  --text:      #e8eaf0;
+  --text-dim:  #6b7280;
+  --text-mid:  #9ca3af;
+  --font-ui:   'Syne', sans-serif;
+  --font-mono: 'DM Mono', monospace;
+  --radius:    6px;
+  --sidebar-w: 320px;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body, #root {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-ui);
+}
+
+/* Scrollbar styling for sidebar */
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+::-webkit-scrollbar-thumb:hover { background: var(--text-dim); }
+
+button {
+  font-family: var(--font-ui);
+  cursor: pointer;
+  border: none;
+  outline: none;
+}
+
+input, select {
+  font-family: var(--font-mono);
+}
