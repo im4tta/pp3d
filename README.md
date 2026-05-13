@@ -108,7 +108,7 @@ python fetch_buildings.py
 ### What the pipeline does
 
 | Step | Description |
-|---|---|---|
+|---|---|
 | **1. Fetch OSM** | Query Overpass API for `building=*` ways and relations |
 | **2. Fetch GBA** | Download TUM Global Building Atlas tile (parquet, ~500MB) with ML-estimated heights |
 | **3. Fetch Overture** | Pull conflated buildings from Overture Maps (OSM + Microsoft ML + Google) |
@@ -181,7 +181,7 @@ pp3d/
 ### Tech Stack
 
 | Layer | Technology |
-|---|---|---|
+|---|---|
 | **Framework** | React 18 + Vite |
 | **3D Rendering** | deck.gl 9.0 (PolygonLayer, _SunLight, LightingEffect) |
 | **3D Export** | Three.js (GLTFExporter) |
@@ -331,7 +331,7 @@ In local development (`localhost`), the frontend calls APIs directly.
 ## Roadmap
 
 | Priority | Feature | Status |
-|---|---|---|---|
+|---|---|---|
 | High | Exact khan boundaries (point-in-polygon) | ✅ Done |
 | High | Color by khan toggle | ✅ Done |
 | High | Sun shadows with time slider | ✅ Done |
