@@ -46,7 +46,6 @@ A high-performance, multi-source 3D building visualization for **Phnom Penh, Cam
 - **3D Terrain** — toggleable terrain heightmap from AWS Terrarium DEM with adjustable exaggeration
 - **LOD by zoom** — adaptive building filtering at low zoom levels for smooth performance
 - **GLB Export** — export visible buildings as 3D `.glb` model (Three.js / Blender / Unity)
-- **GPS Track** — place coordinate markers on the map with labels
 - **Digital Twin** — per-building estimates: energy, occupants, CO₂, floors
 - **Export** — GeoJSON, CSV (WKT), and GLB formats
 - **Light / Dark theme** — toggle with persisted preference + matching map style
@@ -122,7 +121,7 @@ python fetch_buildings.py
 ### Data Sources
 
 | Source | Type | Coverage | Heights | License |
-|---|---|---|---|---|---|
+|---|---|---|---|---|
 | **OpenStreetMap** | Community mapped | ~30k buildings | ~10% confirmed | ODbL |
 | **Global Building Atlas (TUM)** | ML from PlanetScope | ~200k buildings | ML-estimated | CC BY-NC 4.0 |
 | **Overture Maps** | Conflated multi-source | ~100k buildings | Mixed | ODbL |
@@ -151,7 +150,6 @@ pp3d/
 │   │   ├── Sidebar.jsx     # Stats, filters, color mode toggle, legend
 │   │   ├── FilterPanel.jsx # Height range, type filters
 │   │   ├── ExportButton.jsx# GeoJSON / CSV / GLB export
-│   │   ├── GPSTrack.jsx    # GPS marker placement + digital twin info
 │   │   └── RangeSlider.jsx # Dual-handle range slider widget
 │   ├── hooks/
 │   │   └── useBuildings.js # Data loading, enrichment, stats
@@ -280,10 +278,6 @@ Export the visible building scene as a `.glb` (GLTF Binary) file — ready for T
 
 Toggle between dark and light mode using the ☀/☾ button in the sidebar header. The theme preference is persisted to `localStorage`. Switching themes also swaps the base map style (Carto Dark Matter ↔ Carto Positron). The dark mode uses a softer palette (`#141820` base instead of pure black) for reduced eye strain.
 
-### GPS Track
-
-Place coordinate markers on the map by entering latitude/longitude values. Markers appear as red geo-pins rendered as a deck.gl GeoJsonLayer. Click a marker to remove it. Useful for surveying, marking points of interest, or verifying building locations.
-
 ### Digital Twin
 
 When clicking a building, the selection panel now includes a **Digital Twin** section with estimates computed from the building's footprint, height, and type:
@@ -297,7 +291,7 @@ When clicking a building, the selection panel now includes a **Digital Twin** se
 ## The 14 Khans of Phnom Penh
 
 | # | Khan | Color | Character |
-|---|---|---|---|---|
+|---|---|---|---|
 | 1 | **Doun Penh** | Tomato red | Central business district, riverside |
 | 2 | **Chamkar Mon** | Lime green | Russian Market, Independence Monument |
 | 3 | **Prampir Makara** | Gold | Olympic Stadium, Orussey Market |
@@ -343,7 +337,6 @@ In local development (`localhost`), the frontend calls APIs directly.
 | High | OSM edit link + Khan correction in info panel | ✅ Done |
 | High | GLB 3D model export | ✅ Done |
 | High | LOD by zoom (performance) | ✅ Done |
-| High | GPS track markers | ✅ Done |
 | High | Digital twin estimates | ✅ Done |
 | High | Light / Dark theme (persisted) | ✅ Done |
 | Medium | Bbox fallback for boundary matching | ✅ Done |
