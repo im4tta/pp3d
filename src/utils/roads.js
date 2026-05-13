@@ -21,8 +21,8 @@ export async function fetchRoads(bbox = PHNOM_PENH_BBOX) {
 
   const res = await fetch(url, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ query }),
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    body: `data=${encodeURIComponent(query)}`,
   })
 
   if (!res.ok) {

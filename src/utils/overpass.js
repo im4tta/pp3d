@@ -110,19 +110,19 @@ export async function fetchKhans(khanNames, signal, onProgress) {
 }
 
 export const PHNOM_PENH_AREAS = [
-  { name: 'Daun Penh',            bbox: [11.555, 104.916, 11.598, 104.952] },
-  { name: 'Chamkarmon',           bbox: [11.526, 104.893, 11.570, 104.940] },
-  { name: 'Prampir Meakkakra',    bbox: [11.543, 104.940, 11.587, 104.975] },
-  { name: '7 Makara',             bbox: [11.555, 104.890, 11.595, 104.925] },
-  { name: 'Toul Kork',            bbox: [11.568, 104.878, 11.615, 104.920] },
+  { name: 'Doun Penh',            bbox: [11.555, 104.916, 11.598, 104.952] },
+  { name: 'Chamkar Mon',          bbox: [11.526, 104.893, 11.555, 104.940] },
+  { name: 'Prampir Makara',       bbox: [11.543, 104.890, 11.595, 104.975] },
+  { name: 'Tuol Kouk',            bbox: [11.568, 104.878, 11.615, 104.920] },
   { name: 'Russey Keo',           bbox: [11.593, 104.883, 11.660, 104.940] },
   { name: 'Sen Sok',              bbox: [11.568, 104.848, 11.632, 104.895] },
-  { name: 'Por Sen Chey',         bbox: [11.495, 104.840, 11.570, 104.920] },
-  { name: 'Meanchey',             bbox: [11.478, 104.890, 11.550, 104.960] },
+  { name: 'Pou Senchey',          bbox: [11.495, 104.840, 11.570, 104.920] },
+  { name: 'Mean Chey',            bbox: [11.478, 104.890, 11.550, 104.960] },
   { name: 'Dangkao',              bbox: [11.450, 104.840, 11.510, 104.920] },
   { name: 'Chbar Ampov',          bbox: [11.520, 104.940, 11.590, 105.000] },
   { name: 'Chroy Changvar',       bbox: [11.568, 104.928, 11.640, 104.985] },
   { name: 'Prek Pnov',            bbox: [11.620, 104.870, 11.700, 104.960] },
+  { name: 'Boeng Keng Kang',      bbox: [11.535, 104.910, 11.565, 104.945] },
   { name: 'Kamboul',              bbox: [11.420, 104.780, 11.510, 104.880] },
 ]
 

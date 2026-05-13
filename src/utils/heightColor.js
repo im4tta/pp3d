@@ -9,8 +9,6 @@
  *   fallback   (absolute minimum, 3m)   → muted steel blue
  */
 
-import { KHAN_RELATIONS } from './khanBoundaries'
-
 // Confirmed height: dark amber → bright gold → near-white
 export function heightToColor(height, alpha = 230) {
   if (!height || height <= 0) return fallbackColor(alpha)
@@ -119,19 +117,19 @@ export function buildLegendStops() {
 // Pre-defined vibrant colors for each of Phnom Penh's 14 khans
 // Colors are spaced around the hue wheel for maximum distinction
 const KHAN_COLORS = {
-  'Daun Penh':           [255,  99,  71],  // Tomato red
-  'Chamkarmon':          [50,  205,  50],  // Lime green
-  'Prampir Meakkakra':   [30,  144, 255],  // Dodger blue
-  '7 Makara':            [255, 215,   0],  // Gold
-  'Toul Kork':           [238, 130, 238],  // Violet
+  'Doun Penh':           [255,  99,  71],  // Tomato red
+  'Chamkar Mon':         [50,  205,  50],  // Lime green
+  'Prampir Makara':      [255, 215,   0],  // Gold (formerly 7 Makara)
+  'Tuol Kouk':           [238, 130, 238],  // Violet
   'Russey Keo':          [0,   206, 209],  // Dark turquoise
   'Sen Sok':             [255, 165,   0],  // Orange
-  'Por Sen Chey':        [147, 112, 219],  // Medium purple
-  'Meanchey':            [60,  179, 113],  // Medium sea green
+  'Pou Senchey':         [147, 112, 219],  // Medium purple
+  'Mean Chey':           [60,  179, 113],  // Medium sea green
   'Dangkao':             [255,  20, 147],  // Deep pink
   'Chbar Ampov':         [70,  130, 180],  // Steel blue
   'Chroy Changvar':      [220,  20,  60],  // Crimson
   'Prek Pnov':           [255, 185,  15],  // Dark goldenrod
+  'Boeng Keng Kang':     [30,  144, 255],  // Dodger blue
   'Kamboul':             [138,  43, 226],  // Blue violet
 }
 

@@ -1,19 +1,32 @@
 @import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=Syne:wght@400;600;700;800&display=swap');
 
-:root {
-  --bg:        #0a0c10;
-  --surface:   #111318;
-  --surface2:  #1a1d24;
-  --border:    #2a2d36;
+/* ── Dark theme (default, now lighter) ────────────────────────────── */
+:root,
+[data-theme='dark'] {
+  --bg:        #141820;
+  --surface:   #1c212b;
+  --surface2:  #252b38;
+  --border:    #353d4d;
   --accent:    #f0a500;
   --accent2:   #e05c2a;
-  --text:      #e8eaf0;
+  --text:      #e8ecf2;
+  --text-dim:  #8b95a5;
+  --text-mid:  #a8b2c2;
+  --map-style: 'https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json';
+}
+
+/* ── Light theme ──────────────────────────────────────────────────── */
+[data-theme='light'] {
+  --bg:        #eceff4;
+  --surface:   #ffffff;
+  --surface2:  #e6eaf0;
+  --border:    #d5dbe3;
+  --accent:    #c97d00;
+  --accent2:   #b84a1a;
+  --text:      #1a1e26;
   --text-dim:  #6b7280;
-  --text-mid:  #9ca3af;
-  --font-ui:   'Syne', sans-serif;
-  --font-mono: 'DM Mono', monospace;
-  --radius:    6px;
-  --sidebar-w: 320px;
+  --text-mid:  #4b5563;
+  --map-style: 'https://basemaps.cartocdn.com/gl/positron-gl-style/style.json';
 }
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -27,7 +40,14 @@ html, body, #root {
   font-family: var(--font-ui);
 }
 
-/* Scrollbar styling for sidebar */
+/* Shared vars (same in both themes) */
+:root {
+  --font-ui:   'Syne', sans-serif;
+  --font-mono: 'DM Mono', monospace;
+  --radius:    6px;
+  --sidebar-w: 320px;
+}
+
 ::-webkit-scrollbar { width: 4px; }
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }

@@ -4,9 +4,9 @@ import { searchNominatim, formatNominatimResult } from '../utils/nominatim'
 import styles from './SearchBar.module.css'
 
 const GROUPS = [
-  { label: '🏙 Inner City',       names: ['Daun Penh','Chamkarmon','Prampir Meakkakra','7 Makara','Toul Kork'] },
-  { label: '🌆 North / West',     names: ['Russey Keo','Sen Sok','Por Sen Chey'] },
-  { label: '🌳 South',            names: ['Meanchey','Dangkao','Kamboul'] },
+  { label: '🏙 Inner City',       names: ['Doun Penh','Chamkar Mon','Prampir Makara','Tuol Kouk','Boeng Keng Kang'] },
+  { label: '🌆 North / West',     names: ['Russey Keo','Sen Sok','Pou Senchey'] },
+  { label: '🌳 South',            names: ['Mean Chey','Dangkao','Kamboul'] },
   { label: '🌊 East (Riverside)', names: ['Chbar Ampov','Chroy Changvar','Prek Pnov'] },
 ]
 const ALL_NAMES = PHNOM_PENH_AREAS.map(a => a.name)

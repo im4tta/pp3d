@@ -28,10 +28,10 @@
   color: var(--text-dim);
 }
 
-.btnRow {
+.btnRow3 {
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 8px;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 6px;
   margin-bottom: 8px;
 }
 
@@ -39,14 +39,14 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 6px;
-  padding: 9px 0;
+  gap: 4px;
+  padding: 8px 0;
   background: var(--surface2);
   border: 1px solid var(--border);
   border-radius: var(--radius);
   color: var(--text-mid);
   font-family: var(--font-mono);
-  font-size: 11px;
+  font-size: 10px;
   cursor: pointer;
   transition: background 0.15s, border-color 0.15s, color 0.15s;
   letter-spacing: 0.04em;
@@ -67,21 +67,35 @@
   cursor: not-allowed;
 }
 
-/* Flash state after download */
-.btnFlash {
+.btnGlb:hover:not(:disabled) {
+  background: rgba(96, 165, 250, 0.12);
+  border-color: rgba(96, 165, 250, 0.5);
+  color: #60a5fa;
+}
+
+.flash {
   background: rgba(240, 165, 0, 0.12) !important;
   border-color: var(--accent) !important;
   color: var(--accent) !important;
 }
 
 .icon {
-  font-size: 12px;
+  font-size: 11px;
   opacity: 0.7;
 }
 
 .checkmark {
-  font-size: 11px;
+  font-size: 10px;
   letter-spacing: 0.05em;
+}
+
+.spinner {
+  display: inline-block;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
 }
 
 .hint {

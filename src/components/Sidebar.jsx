@@ -2,7 +2,7 @@ import SearchBar from './SearchBar'
 import FilterPanel from './FilterPanel'
 import ExportButton from './ExportButton'
 import { buildLegendStops, buildKhanLegendStops } from '../utils/heightColor'
-import { KHAN_RELATIONS } from '../utils/khanBoundaries'
+import { KHAN_NAMES } from '../utils/khanBoundaries'
 import styles from './Sidebar.module.css'
 
 const SOURCE_LABELS = {
@@ -16,7 +16,7 @@ export default function Sidebar({
   filters, onFilterChange,
   visibleCount, visibleBuildings, areaName, dataSource,
   colorMode, onColorModeChange,
-  onAddressSelect,
+  onAddressSelect, theme, onThemeToggle,
 }) {
   const legend = buildLegendStops()
   const khanLegend = buildKhanLegendStops()
@@ -29,9 +29,20 @@ export default function Sidebar({
     <aside className={styles.sidebar}>
       {/* Header */}
       <div className={styles.header}>
-        <div className={styles.title}>
-          <span className={styles.titleAccent}>PNH</span>
-          <span className={styles.titleMain}>3D BUILDINGS</span>
+        <div style={{ display:'flex', justifyContent:'space-between', alignItems:'flex-start' }}>
+          <div className={styles.title}>
+            <span className={styles.titleAccent}>PNH</span>
+            <span className={styles.titleMain}>3D BUILDINGS</span>
+          </div>
+          <button onClick={onThemeToggle}
+            style={{
+              background: 'none', border: '1px solid var(--border)', borderRadius: 4,
+              padding: '4px 8px', fontSize: 14, cursor: 'pointer',
+              color: 'var(--text-dim)', lineHeight: 1,
+            }}
+            title={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}>
+            {theme === 'dark' ? '☀' : '☾'}
+          </button>
         </div>
         <p className={styles.subtitle}>Phnom Penh · 14 Khans · Multi-source</p>
 
@@ -161,7 +172,7 @@ export default function Sidebar({
       {/* Khan Legend */}
       {colorMode === 'khan' && (
         <div className={styles.section}>
-          <div className={styles.sectionLabel}>KHAN COLORS ({Object.keys(KHAN_RELATIONS).length})</div>
+          <div className={styles.sectionLabel}>KHAN COLORS ({KHAN_NAMES.length})</div>
           <div className={styles.khanLegend}>
             {khanLegend.map((stop) => (
               <div key={stop.label} className={styles.khanLegendItem}>
@@ -179,6 +190,7 @@ export default function Sidebar({
           buildings={visibleBuildings}
           areaName={areaName}
           disabled={!stats}
+          colorMode={colorMode}
         />
       )}
 

@@ -51,19 +51,19 @@ CACHE_DIR.mkdir(exist_ok=True)
 # Phnom Penh's 14 khans with precise boundary polygons (simplified)
 # These are used to assign each building to its correct khan
 KHAN_BOUNDARIES = {
-    "Daun Penh":         [11.555, 104.916, 11.598, 104.952],
-    "Chamkarmon":        [11.526, 104.893, 11.570, 104.940],
-    "Prampir Meakkakra": [11.543, 104.940, 11.587, 104.975],
-    "7 Makara":          [11.555, 104.890, 11.595, 104.925],
-    "Toul Kork":         [11.568, 104.878, 11.615, 104.920],
+    "Doun Penh":         [11.555, 104.916, 11.598, 104.952],
+    "Chamkar Mon":       [11.526, 104.893, 11.555, 104.940],
+    "Prampir Makara":    [11.543, 104.890, 11.595, 104.975],
+    "Tuol Kouk":         [11.568, 104.878, 11.615, 104.920],
     "Russey Keo":        [11.593, 104.883, 11.660, 104.940],
     "Sen Sok":           [11.568, 104.848, 11.632, 104.895],
-    "Por Sen Chey":      [11.495, 104.840, 11.570, 104.920],
-    "Meanchey":          [11.478, 104.890, 11.550, 104.960],
+    "Pou Senchey":       [11.495, 104.840, 11.570, 104.920],
+    "Mean Chey":         [11.478, 104.890, 11.550, 104.960],
     "Dangkao":           [11.450, 104.840, 11.510, 104.920],
     "Chbar Ampov":       [11.520, 104.940, 11.590, 105.000],
     "Chroy Changvar":    [11.568, 104.928, 11.640, 104.985],
     "Prek Pnov":         [11.620, 104.870, 11.700, 104.960],
+    "Boeng Keng Kang":   [11.535, 104.910, 11.565, 104.945],
     "Kamboul":           [11.420, 104.780, 11.510, 104.880],
 }
 
@@ -251,7 +251,167 @@ def parse_gba(gdf):
     return features
 
 
-# ─── Step 3: OSM via Overpass ─────────────────────────────────────────────────
+# ─── Step 3: Microsoft Global ML Building Footprints ──────────────────────────
+
+def fetch_microsoft():
+    """Download Microsoft Global ML Building Footprints from GitHub releases."""
+    cache_file = CACHE_DIR / "microsoft_buildings.geojson"
+    if cache_file.exists():
+        print(f"[Microsoft] Using cache: {cache_file}")
+        return gpd.read_file(cache_file)
+
+    print("[Microsoft] Downloading building footprints from Microsoft GitHub...")
+    # Microsoft Building Footprints are available as GeoJSON per country
+    # Cambodia is in the southeast asia region
+    url = (
+        "https://github.com/microsoft/"
+        "GlobalMLBuildingFootprints/releases/download/"
+        "v2.0/cambodia.geojson"
+    )
+
+    try:
+        resp = requests.get(url, stream=True, timeout=120)
+        resp.raise_for_status()
+        total = int(resp.headers.get("Content-Length", 0))
+        with open(cache_file, "wb") as f, tqdm(
+            total=total, unit="B", unit_scale=True, desc="MS Footprints"
+        ) as bar:
+            for chunk in resp.iter_content(chunk_size=1024 * 256):
+                f.write(chunk)
+                bar.update(len(chunk))
+    except Exception as e:
+        print(f"[Microsoft] Download failed: {e}")
+        return gpd.GeoDataFrame()
+
+    gdf = gpd.read_file(cache_file)
+
+    # Clip to city bbox
+    city_box = box(CITY_BBOX["west"], CITY_BBOX["south"], CITY_BBOX["east"], CITY_BBOX["north"])
+    gdf = gdf[gdf.geometry.intersects(city_box)].copy()
+    print(f"[Microsoft] Got {len(gdf)} buildings in Phnom Penh")
+    return gdf
+
+
+def parse_microsoft(gdf):
+    """Normalize Microsoft GeoDataFrame to our schema."""
+    if gdf.empty:
+        return []
+
+    features = []
+    for _, row in gdf.iterrows():
+        # Microsoft footprints don't include height data
+        features.append({
+            "geometry": row.geometry,
+            "height":   None,
+            "source":   "microsoft",
+            "type":     "yes",
+            "name":     None,
+            "levels":   None,
+            "osm_id":   None,
+        })
+    return features
+
+
+# ─── Step 4: Google Open Buildings v3 ─────────────────────────────────────────
+
+def fetch_google():
+    """Download Google Open Buildings v3 data via HuggingFace or direct URL."""
+    cache_file = CACHE_DIR / "google_buildings.parquet"
+    if cache_file.exists():
+        print(f"[Google] Using cache: {cache_file}")
+        return gpd.read_parquet(cache_file)
+
+    print("[Google] Downloading Google Open Buildings v3 data...")
+
+    # Google Open Buildings v3 is available on HuggingFace as parquet files
+    # Cambodia is in the southeast_asia region
+    base_url = "https://huggingface.co/datasets/google-research-datasets/open-buildings-v3/resolve/main/"
+
+    # The dataset is split by regions; southeast_asia covers Cambodia
+    tile_name = "southeast_asia"
+    parquet_url = f"{base_url}{tile_name}.parquet"
+
+    try:
+        resp = requests.get(parquet_url, stream=True, timeout=300)
+        resp.raise_for_status()
+        total = int(resp.headers.get("Content-Length", 0))
+        with open(cache_file, "wb") as f, tqdm(
+            total=total, unit="B", unit_scale=True, desc="Google Buildings"
+        ) as bar:
+            for chunk in resp.iter_content(chunk_size=1024 * 256):
+                f.write(chunk)
+                bar.update(len(chunk))
+    except Exception as e:
+        print(f"[Google] Download failed: {e}")
+        print("[Google] Trying alternative URL format...")
+        try:
+            alt_url = (
+                "https://storage.googleapis.com/open-buildings-data/v3/"
+                "polygons_s2_level_6/geojson/southeast_asia.parquet"
+            )
+            resp = requests.get(alt_url, stream=True, timeout=300)
+            resp.raise_for_status()
+            total = int(resp.headers.get("Content-Length", 0))
+            with open(cache_file, "wb") as f, tqdm(
+                total=total, unit="B", unit_scale=True, desc="Google Buildings"
+            ) as bar:
+                for chunk in resp.iter_content(chunk_size=1024 * 256):
+                    f.write(chunk)
+                    bar.update(len(chunk))
+        except Exception as e2:
+            print(f"[Google] Alternative download also failed: {e2}")
+            return gpd.GeoDataFrame()
+
+    try:
+        df = pd.read_parquet(cache_file)
+        # Google uses WKB geometry
+        if "geometry" in df.columns:
+            df["geometry"] = df["geometry"].apply(lambda x: wkb.loads(x) if isinstance(x, (bytes, bytearray)) else x)
+        gdf = gpd.GeoDataFrame(df, geometry="geometry", crs="EPSG:4326")
+
+        # Clip to city bbox
+        city_box = box(CITY_BBOX["west"], CITY_BBOX["south"], CITY_BBOX["east"], CITY_BBOX["north"])
+        gdf = gdf[gdf.geometry.intersects(city_box)].copy()
+        print(f"[Google] Got {len(gdf)} buildings in Phnom Penh")
+        return gdf
+    except Exception as e:
+        print(f"[Google] Parse failed: {e}")
+        return gpd.GeoDataFrame()
+
+
+def parse_google(gdf):
+    """Normalize Google Open Buildings GeoDataFrame to our schema."""
+    if gdf.empty:
+        return []
+
+    features = []
+    for _, row in gdf.iterrows():
+        # Google data includes 'area_in_meters' and confidence scores
+        height = None
+        # Google doesn't provide height directly, but we can estimate from area
+        area_m2 = row.get("area_in_meters")
+        if area_m2 and area_m2 > 0:
+            # Rough heuristic: larger buildings tend to be taller
+            if area_m2 > 5000:
+                height = 12.0
+            elif area_m2 > 1000:
+                height = 8.0
+            elif area_m2 > 200:
+                height = 5.0
+
+        features.append({
+            "geometry": row.geometry,
+            "height":   height,
+            "source":   "google_open_buildings",
+            "type":     "yes",
+            "name":     None,
+            "levels":   None,
+            "osm_id":   None,
+        })
+    return features
+
+
+# ─── Step 5: OSM via Overpass ─────────────────────────────────────────────────
 
 def fetch_osm():
     """Fetch all buildings in PNH from Overpass, including height/levels."""
@@ -390,10 +550,10 @@ def estimate_height(geom, building_type):
     return round(base_floors * 3.2, 1)
 
 
-def merge_sources(osm_features, overture_features, gba_features):
+def merge_sources(osm_features, overture_features, gba_features, ms_features=None, goog_features=None):
     """
-    Merge three feature lists. Deduplicate by IoU overlap > 0.4.
-    Priority for height: OSM > GBA > Overture > estimated
+    Merge multiple feature lists. Deduplicate by IoU overlap > 0.4.
+    Priority for height: OSM > GBA > Overture > Microsoft > Google > estimated
     """
     print("[Merge] Building spatial index...")
 
@@ -425,10 +585,14 @@ def merge_sources(osm_features, overture_features, gba_features):
             added += 1
         print(f"[Merge] {label}: added {added} unique buildings")
 
-    # Priority order: OSM first (highest quality tags), then GBA (best height), then Overture
+    # Priority order: OSM (highest quality) > GBA (best height) > Overture > Microsoft > Google
     add_batch(osm_features,      "OSM")
     add_batch(gba_features,      "GBA")
     add_batch(overture_features, "Overture")
+    if ms_features:
+        add_batch(ms_features,  "Microsoft")
+    if goog_features:
+        add_batch(goog_features, "Google")
 
     print(f"[Merge] Total unique buildings: {len(all_features)}")
     return all_features
@@ -482,7 +646,7 @@ def build_geojson(features):
             "total":       len(out_features),
             "city":        "Phnom Penh, Cambodia",
             "bbox":        CITY_BBOX,
-            "sources":     ["OSM (Overpass)", "Global Building Atlas (TUM)", "Overture Maps"],
+            "sources":     ["OSM (Overpass)", "Global Building Atlas (TUM)", "Overture Maps", "Microsoft ML Footprints", "Google Open Buildings v3"],
             "generated":   pd.Timestamp.now().isoformat(),
         }
     }
@@ -493,27 +657,37 @@ def build_geojson(features):
 def main():
     print("=" * 60)
     print("  Phnom Penh 3D Buildings — Data Pipeline")
-    print("  Sources: OSM + GBA (TUM) + Overture Maps")
+    print("  Sources: OSM + GBA (TUM) + Overture + Microsoft + Google")
     print("=" * 60)
 
     # Fetch all sources
-    print("\n[1/4] Fetching OSM buildings via Overpass...")
+    print("\n[1/5] Fetching OSM buildings via Overpass...")
     osm_gdf      = fetch_osm()
     osm_features = parse_osm(osm_gdf)
     print(f"      → {len(osm_features)} OSM buildings")
 
-    print("\n[2/4] Fetching Global Building Atlas (GBA)...")
+    print("\n[2/5] Fetching Global Building Atlas (GBA)...")
     gba_gdf      = fetch_gba()
     gba_features = parse_gba(gba_gdf)
     print(f"      → {len(gba_features)} GBA buildings")
 
-    print("\n[3/4] Fetching Overture Maps buildings...")
+    print("\n[3/5] Fetching Overture Maps buildings...")
     ov_gdf       = fetch_overture()
     ov_features  = parse_overture(ov_gdf)
     print(f"      → {len(ov_features)} Overture buildings")
 
-    print("\n[4/4] Merging and deduplicating...")
-    merged  = merge_sources(osm_features, ov_features, gba_features)
+    print("\n[4/5] Fetching Microsoft Global ML Building Footprints...")
+    ms_gdf       = fetch_microsoft()
+    ms_features  = parse_microsoft(ms_gdf)
+    print(f"      → {len(ms_features)} Microsoft buildings")
+
+    print("\n[5/5] Fetching Google Open Buildings v3...")
+    goog_gdf     = fetch_google()
+    goog_features = parse_google(goog_gdf)
+    print(f"      → {len(goog_features)} Google buildings")
+
+    print("\n[6/6] Merging and deduplicating...")
+    merged  = merge_sources(osm_features, ov_features, gba_features, ms_features, goog_features)
     geojson = build_geojson(merged)
 
     # Write output
