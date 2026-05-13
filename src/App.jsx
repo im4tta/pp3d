@@ -81,7 +81,7 @@ export default function App() {
   const { buildings, loading, error, stats, progress, dataSource } = useBuildings(bbox)
 
   useEffect(() => {
-    if (!bbox) return
+    if (!bbox || !Array.isArray(bbox) || bbox.length !== 4) return
     fetchRoads(bbox).then(setRoads).catch(console.error)
   }, [bbox])
 

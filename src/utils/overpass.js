@@ -1,6 +1,5 @@
 // Use Vercel proxy in production, direct API in dev
-const isProd = typeof window !== 'undefined' && !window.location.hostname.includes('localhost')
-const OVERPASS_URL = isProd
+const OVERPASS_URL = import.meta.env.PROD
   ? '/api/overpass'
   : 'https://overpass-api.de/api/interpreter'
 
@@ -9,20 +8,13 @@ async function fetchTile(bbox, signal) {
   const [south, west, north, east] = bbox
   const query = `[out:json][timeout:90];(way["building"](${south},${west},${north},${east});relation["building"](${south},${west},${north},${east}););out body;>;out skel qt;`
 
-  const fetchOptions = isProd
-    ? {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ query }),
-        signal,
-      }
-    : {
-        method: 'POST',
-        body: new URLSearchParams({ data: query }),
-        signal,
-      }
+  const res = await fetch(OVERPASS_URL, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    body: `data=${encodeURIComponent(query)}`,
+    signal,
+  })
 
-  const res = await fetch(OVERPASS_URL, fetchOptions)
   if (!res.ok) throw new Error(`HTTP ${res.status}`)
   return res.json()
 }
