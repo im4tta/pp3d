@@ -1,9 +1,7 @@
 import https from 'node:https'
-import querystring from 'node:querystring'
 
 function readBody(req) {
   return new Promise((resolve) => {
-    if (req.body) return resolve(req.body)
     let data = ''
     req.on('data', chunk => data += chunk)
     req.on('end', () => resolve(data))
@@ -22,22 +20,18 @@ export default async (req, res) => {
     const rawBody = await readBody(req)
 
     let query = null
-    // Try JSON first
     try {
       const parsed = JSON.parse(rawBody)
       query = parsed.query
     } catch (e) {
-      // Not JSON — try form-urlencoded
-      const parsed = querystring.parse(rawBody)
-      query = parsed.data || parsed.query
+      // not JSON
     }
 
     if (!query) {
       return res.status(400).json({
         error: 'Missing query',
-        received: String(rawBody).slice(0, 500),
+        received: rawBody.slice(0, 500),
         method: req.method,
-        contentType: req.headers['content-type'],
       })
     }
 

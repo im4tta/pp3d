@@ -3,7 +3,6 @@
  */
 
 const OVERPASS_URL = 'https://overpass-api.de/api/interpreter'
-const PROXY_URL = '/api/overpass'
 
 // Phnom Penh bounding box
 const PHNOM_PENH_BBOX = '104.72,11.42,105.12,11.75'
@@ -17,12 +16,13 @@ export async function fetchRoads(bbox = PHNOM_PENH_BBOX) {
     out geom;
   `
 
-  const url = import.meta.env.PROD ? PROXY_URL : OVERPASS_URL
+  const isProd = import.meta.env.PROD
+  const url = isProd ? '/api/overpass' : OVERPASS_URL
 
   const res = await fetch(url, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-    body: `data=${encodeURIComponent(query)}`,
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ query }),
   })
 
   if (!res.ok) {
