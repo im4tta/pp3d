@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState, useCallback, useMemo } from 'react'
 import maplibregl from 'maplibre-gl'
 import { Deck, _SunLight, LightingEffect } from '@deck.gl/core'
-import { PolygonLayer } from '@deck.gl/layers'
+import { PolygonLayer, GeoJsonLayer } from '@deck.gl/layers'
 import { heightToColor, estimatedHeightColor, khanToColor } from '../utils/heightColor'
 
 const STYLE_URL = 'https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json'
@@ -12,7 +12,7 @@ const INITIAL_VIEW = {
   transitionDuration: 0,
 }
 
-export default function Map3D({ buildings, onBuildingClick, flyToBbox, colorMode = 'height' }) {
+export default function Map3D({ buildings, roads, onBuildingClick, flyToBbox, colorMode = 'height' }) {
   const containerRef  = useRef(null)
   const mapRef        = useRef(null)
   const deckRef       = useRef(null)
@@ -21,6 +21,18 @@ export default function Map3D({ buildings, onBuildingClick, flyToBbox, colorMode
   const [vs, setVs]   = useState(INITIAL_VIEW)
   const [sunTime, setSunTime] = useState(12) // 0-24 hours, default noon
   const [shadowsEnabled, setShadowsEnabled] = useState(true)
+  const [showRoads, setShowRoads] = useState(false)
+  const [heightScale, setHeightScale] = useState(1)
+
+  // Export screenshot
+  const exportScreenshot = useCallback(() => {
+    const canvas = deckRef.current?.canvas
+    if (!canvas) return
+    const link = document.createElement('a')
+    link.download = `phnompenh-3d-${Date.now()}.png`
+    link.href = canvas.toDataURL('image/png')
+    link.click()
+  }, [])
 
   // Create sun light and lighting effect
   const sunLight = useMemo(() => new _SunLight({
@@ -44,7 +56,7 @@ export default function Map3D({ buildings, onBuildingClick, flyToBbox, colorMode
     extruded:        true,
     wireframe:       false,
     getElevation:    f => Math.max(Number(f.properties?.height) || 4, 3),
-    elevationScale:  1,
+    elevationScale:  heightScale,
     getFillColor:    f => {
       if (colorMode === 'khan') {
         return khanToColor(f.properties?.khan, 230)
@@ -60,8 +72,31 @@ export default function Map3D({ buildings, onBuildingClick, flyToBbox, colorMode
     autoHighlight:   true,
     highlightColor:  [255, 210, 80, 210],
     transitions:     { getElevation: 300, getFillColor: 300 },
-    updateTriggers:  { getFillColor: [buildings?.length, colorMode], getElevation: [buildings?.length] },
-  }), [buildings, colorMode])
+    updateTriggers:  { getFillColor: [buildings?.length, colorMode], getElevation: [buildings?.length, heightScale] },
+  }), [buildings, colorMode, heightScale])
+
+  // Build a GeoJsonLayer for roads
+  const makeRoadLayer = useCallback((data) => new GeoJsonLayer({
+    id: 'roads',
+    data,
+    stroked: true,
+    filled: false,
+    lineWidthMinPixels: 2,
+    getLineColor: f => {
+      const highway = f.properties?.highway
+      if (highway === 'primary') return [255, 200, 100, 200]
+      if (highway === 'secondary') return [200, 180, 150, 180]
+      if (highway === 'tertiary') return [180, 160, 130, 160]
+      return [150, 140, 120, 140]
+    },
+    getLineWidth: f => {
+      const highway = f.properties?.highway
+      if (highway === 'primary') return 4
+      if (highway === 'secondary') return 3
+      if (highway === 'tertiary') return 2
+      return 1
+    },
+  }), [])
 
   // ── Init MapLibre + Deck once ─────────────────────────────────────────────
   useEffect(() => {
@@ -149,8 +184,12 @@ export default function Map3D({ buildings, onBuildingClick, flyToBbox, colorMode
       pendingRef.current = buildings
       return
     }
-    deckRef.current.setProps({ layers: [makeLayer(buildings)], effects: [lightingEffect] })
-  }, [buildings, makeLayer, lightingEffect])
+    const layers = [makeLayer(buildings)]
+    if (showRoads && roads) {
+      layers.push(makeRoadLayer(roads))
+    }
+    deckRef.current.setProps({ layers, effects: [lightingEffect] })
+  }, [buildings, roads, showRoads, makeLayer, makeRoadLayer, lightingEffect])
 
   // ── Fly to bbox ───────────────────────────────────────────────────────────
   useEffect(() => {
@@ -194,6 +233,58 @@ export default function Map3D({ buildings, onBuildingClick, flyToBbox, colorMode
         fontFamily: 'monospace', fontSize: 11, color: '#8b949e',
         zIndex: 20, minWidth: 180,
       }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
+          <button
+            onClick={() => setShowRoads(!showRoads)}
+            style={{
+              background: showRoads ? 'rgba(163, 230, 53, 0.2)' : 'rgba(72, 79, 88, 0.2)',
+              border: showRoads ? '1px solid #a3e635' : '1px solid #484f58',
+              borderRadius: 4, padding: '4px 8px', fontSize: 11,
+              color: showRoads ? '#a3e635' : '#8b949e', cursor: 'pointer',
+            }}
+          >
+            {showRoads ? '🛣️ Roads ON' : '🛣️ Roads OFF'}
+          </button>
+          <button
+            onClick={exportScreenshot}
+            style={{
+              background: 'rgba(96, 165, 250, 0.2)', border: '1px solid #60a5fa',
+              borderRadius: 4, padding: '4px 8px', fontSize: 11,
+              color: '#60a5fa', cursor: 'pointer',
+            }}
+            title="Export screenshot"
+          >
+            📷 Export
+          </button>
+        </div>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
+          <span style={{ color: heightScale !== 1 ? 'var(--accent)' : '#8b949e' }}>
+            📏 Height {heightScale.toFixed(1)}x
+          </span>
+          <button
+            onClick={() => setHeightScale(1)}
+            style={{
+              background: 'none', border: 'none', fontSize: 10, cursor: 'pointer',
+              color: heightScale !== 1 ? '#a3e635' : '#484f58', padding: 0,
+            }}
+            title="Reset height scale"
+          >
+            ↺
+          </button>
+        </div>
+        <input
+          type="range"
+          min="0.5"
+          max="3"
+          step="0.1"
+          value={heightScale}
+          onChange={(e) => setHeightScale(parseFloat(e.target.value))}
+          style={{ width: '100%', cursor: 'pointer', marginBottom: 8 }}
+        />
+        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 9, marginTop: 2, color: '#484f58', marginBottom: 8 }}>
+          <span>0.5x</span>
+          <span>3x</span>
+        </div>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
           <span style={{ color: shadowsEnabled ? 'var(--accent)' : '#484f58' }}>
             ☀ {formatTime(sunTime)}
